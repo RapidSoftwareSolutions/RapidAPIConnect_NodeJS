@@ -1,0 +1,30 @@
+{
+  "name": "rapidapi-connect",
+  "version": "0.0.1",
+  "description": "Connect to blocks on the rapidapi.com marketplace",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RapidSoftwareSolutions/RapidAPIConnect_NodeJS.git"
+  },
+  "keywords": [
+    "RapidAPI",
+    "Connect",
+    "Node",
+    "API"
+  ],
+  "author": "R Software Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RapidSoftwareSolutions/RapidAPIConnect_NodeJS/issues"
+  },
+  "homepage": "https://github.com/RapidSoftwareSolutions/RapidAPIConnect_NodeJS",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3",
+    "request": "^2.72.0"
+  }
+}
