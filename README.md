@@ -2,6 +2,8 @@
 
 This SDK allows you to connect to RapidAPI blocks from your node.js app. To start off, follow the following guide:
 
+[![npm version](https://badge.fury.io/js/rapidapi-connect.svg)](https://badge.fury.io/js/rapidapi-connect)
+
 ##Set-up:
 
 First of all, download the npm module:
