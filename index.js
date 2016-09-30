@@ -1,6 +1,7 @@
 "use strict";
 
-const request = require('request');
+const request = require('request'),
+    fs = require('fs');
 
 class RapidAPI {
 
@@ -46,13 +47,23 @@ class RapidAPI {
         request({
             method: 'POST',
             uri: RapidAPI.blockURLBuilder(pack, block),
+            headers: {
+                'User-Agent': 'RapidAPIConnect_NodeJS',
+                'Content-Type' : 'multipart/form-data'
+            },
             auth: {
                 'user': this.project,
                 'pass': this.key,
                 'sendImmediately': true
             },
-            json: args || {}
+            formData: args || {}
         }, (error, response, body) => {
+            try {
+                if (typeof body != 'object')
+                    body = JSON.parse(body);
+            } catch (e) {
+                error = e;
+            }
             if (error || response.statusCode != 200 || !(body.hasOwnProperty('outcome'))) {
                 if (__callbacks.hasOwnProperty('error')) {
                     __callbacks['error'](body);

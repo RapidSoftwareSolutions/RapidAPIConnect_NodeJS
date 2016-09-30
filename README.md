@@ -3,6 +3,9 @@
 This SDK allows you to connect to RapidAPI blocks from your node.js app. To start off, follow the following guide:
 
 [![npm version](https://badge.fury.io/js/rapidapi-connect.svg)](https://badge.fury.io/js/rapidapi-connect)
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.png?v=103)](https://opensource.org/licenses/mit-license.php)
+[![forthebadge](http://forthebadge.com/images/badges/built-by-developers.svg)](http://forthebadge.com)
+[![forthebadge](http://forthebadge.com/images/badges/uses-js.svg)](http://forthebadge.com)
 
 ##Set-up:
 
@@ -51,6 +54,46 @@ The following will call the **Calculate.add** block, and print the result:
 The printed result will be `13`.
 
 **Notice** that the `error` event will also be called if you make an invalid block call (for example - the package you refer to does not exist).
+
+##Files:
+Whenever a block in RapidAPI requires a file, you can either pass a URL to the file or a read stream.
+
+###URL:
+The following code will call the block MicrosoftComputerVision.analyzeImage with a URL of an image:
+
+```
+rapid.call('MicrosoftComputerVision', 'analyzeImage', {
+    subscriptionKey : '############################',
+    image : 'https://i.ytimg.com/vi/tntOCGkgt98/maxresdefault.jpg
+})
+    .on('success', (payload) => {
+        console.log('S');
+        console.log(payload);
+    })
+    .on ('error', (payload) => {
+        console.log('E');
+        console.log(payload);
+    });
+```
+
+###Read Stream
+If the file is locally stored, you can read it using `fs` and pass the read stream to the block, like the following:
+```
+rapid.call('MicrosoftComputerVision', 'analyzeImage', {
+    subscriptionKey : '############################',
+    image : fs.createReadStream(__dirname + '/m.jpeg')
+})
+    .on('success', (payload) => {
+        console.log('S');
+        console.log(payload);
+    })
+    .on ('error', (payload) => {
+        console.log('E');
+        console.log(payload);
+    });
+```
+
+RapidAPI uses the [form-data](https://github.com/form-data/form-data) library by [@felixge](https://github.com/felixge) to handle files, so please refer to it for more information.
 
 ##Issues:
 
