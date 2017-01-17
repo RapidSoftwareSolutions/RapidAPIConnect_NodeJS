@@ -1,7 +1,8 @@
 "use strict";
 
 const request = require('request'),
-    fs = require('fs');
+      WebSocket = require('ws'),
+      fs = require('fs');
 
 class RapidAPI {
 
@@ -21,6 +22,32 @@ class RapidAPI {
      */
     static blockURLBuilder(pack, block) {
         return `${RapidAPI.getBaseURL()}/${pack}/${block}`;
+    }
+
+    /**
+    * Returns the base URL for webhook event callbacks
+    * @return {string} Base URL for webhook event callbacks
+    */
+    static callbackBaseURL() {
+        return "https://webhooks.rapidapi.io";
+    }
+
+    /**
+     * Returns the base URL for websocket connection
+     * @return {string} Base URL for websocket connection
+     */
+    static websocketBaseURL() {
+        return "ws://webhooks.rapidapi.io";
+    }
+    
+    /**
+    * Build a URL for a webhook event callback
+    * @param pack Package where the block is
+    * @param event Event to be called
+    * @returns {string} Generated callback URL
+    */
+    static eventURLBuilder(pack, event) {
+        return `${RapidAPI.callbackBaseURL()}/${pack}/${event}/${this.project}/${this.key}`;
     }
 
     /**
@@ -87,6 +114,53 @@ class RapidAPI {
             }
         };
         return r;
+    }
+
+    /**
+     * Listen for webhook events
+     * @param pack Package of the event
+     * @param event Name of the event
+     * @param callbacks Callback functions to call on message and on connection close
+     */
+    listen (pack, event, callbacks) {
+        const user_id = `${pack}.${event}_${this.project}:${this.key}`;
+        const {
+            onMessage = () => {},
+            onClose = () => {}
+        } = callbacks;
+        request({
+            uri: `${RapidAPI.callbackBaseURL()}/api/get_token?user_id=${user_id}`,
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            auth: {
+                'user': this.project,
+                'pass': this.key,
+                'sendImmediately': true
+            }
+        }, (error, response, body) => {
+            const { token } = JSON.parse(body);
+            const sock_url = `${RapidAPI.websocketBaseURL()}/socket/websocket?token=${token}`;
+            const ws = new WebSocket(sock_url);
+            ws.onmessage = (msg) => {
+                const { payload, event } = JSON.parse(msg.data);
+                if (!event.startsWith("phx_")) {
+                    onMessage(payload.body);
+                }
+            };
+            ws.onclose = (code, reason) => {
+                onClose(code, reason);
+            };
+            ws.onopen = () => {
+                ws.send(JSON.stringify({
+                    topic: `users_socket:${user_id}`,
+                    event: "phx_join",
+                    payload: {},
+                    ref: '1'
+                }));
+            };
+        });    
     }
 }
 
