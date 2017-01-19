@@ -122,14 +122,14 @@ class RapidAPI {
      * @param event Name of the event
      * @param callbacks Callback functions to call on message and on connection close
      */
-    listen (pack, event, callbacks) {
+    listen (pack, event, params, callbacks) {
         const user_id = `${pack}.${event}_${this.project}:${this.key}`;
         const {
             onMessage = () => {},
             onClose = () => {}
         } = callbacks;
         request({
-            uri: `${RapidAPI.callbackBaseURL()}/api/get_token?user_id=${user_id}`,
+            uri: `${RapidAPI.callbackBaseURL()}/api/get_token?user_id=${user_id}&params=${JSON.stringify(params)}`,
             method: 'GET',
             headers: {
                 "Content-Type": "application/json"
