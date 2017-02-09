@@ -1,7 +1,7 @@
 "use strict";
 
 const request = require('request'),
-      WebSocket = require('ws'),
+      Socket = require('./socket'),
       fs = require('fs');
 
 class RapidAPI {
@@ -129,7 +129,7 @@ class RapidAPI {
             onClose = () => {}
         } = callbacks;
         request({
-            uri: `${RapidAPI.callbackBaseURL()}/api/get_token?user_id=${user_id}&params=${JSON.stringify(params)}`,
+            uri: `${RapidAPI.callbackBaseURL()}/api/get_token?user_id=${user_id}`,
             method: 'GET',
             headers: {
                 "Content-Type": "application/json"
@@ -142,24 +142,16 @@ class RapidAPI {
         }, (error, response, body) => {
             const { token } = JSON.parse(body);
             const sock_url = `${RapidAPI.websocketBaseURL()}/socket/websocket?token=${token}`;
-            const ws = new WebSocket(sock_url);
-            ws.onmessage = (msg) => {
-                const { payload, event } = JSON.parse(msg.data);
-                if (!event.startsWith("phx_")) {
-                    onMessage(payload.body);
-                }
-            };
-            ws.onclose = (code, reason) => {
-                onClose(code, reason);
-            };
-            ws.onopen = () => {
-                ws.send(JSON.stringify({
-                    topic: `users_socket:${user_id}`,
-                    event: "phx_join",
-                    payload: {},
-                    ref: '1'
-                }));
-            };
+            const socket = new Socket.Socket(sock_url, {
+                params: {token}
+            });
+            socket.connect();
+            const channel = socket.channel(`users_socket:${user_id}`, params);
+            channel.on('new_msg', msg => onMessage(msg.body));
+            channel.join()
+                   .receive('error', reason => onError(reason))
+                   .receive('timeout', () => console.log("network issue"));
+            channel.onClose(onClose);
         });    
     }
 }
