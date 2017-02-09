@@ -95,6 +95,18 @@ rapid.call('MicrosoftComputerVision', 'analyzeImage', {
 
 RapidAPI uses the [form-data](https://github.com/form-data/form-data) library by [@felixge](https://github.com/felixge) to handle files, so please refer to it for more information.
 
+
+###Webhooks
+After setting up the webhook, you can listen to real-time events via websockets like so:
+
+```
+rapid.listen('Slack', 'Outgoing', {token: 'YOUR_TOKEN_HERE'})
+    .on('join', msg => { console.log("join: ", msg); })
+    .on('error', msg => { console.log("error: ", msg); })
+    .on('message', payload => { console.log("message: ", payload); })
+    .on('timeout', reason => { console.log("timeout: ", payload); })
+    .on('close', reason => { console.log("close: ", reason); });
+```
 ##Issues:
 
 As this is a pre-release version of the SDK, you may expirience bugs. Please report them in the issues section to let us know. You may use the intercom chat on rapidapi.com for support at any time.

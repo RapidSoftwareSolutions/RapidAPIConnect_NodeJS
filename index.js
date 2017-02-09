@@ -1,7 +1,8 @@
 "use strict";
 
 const request = require('request'),
-    fs = require('fs');
+      Socket = require('./socket'),
+      fs = require('fs');
 
 class RapidAPI {
 
@@ -21,6 +22,22 @@ class RapidAPI {
      */
     static blockURLBuilder(pack, block) {
         return `${RapidAPI.getBaseURL()}/${pack}/${block}`;
+    }
+
+    /**
+    * Returns the base URL for webhook event callbacks
+    * @return {string} Base URL for webhook event callbacks
+    */
+    static callbackBaseURL() {
+        return "http://webhooks.imrapid.io";
+    }
+
+    /**
+     * Returns the base URL for websocket connection
+     * @return {string} Base URL for websocket connection
+     */
+    static websocketBaseURL() {
+        return "ws://webhooks.imrapid.io";
     }
 
     /**
@@ -83,6 +100,56 @@ class RapidAPI {
                 } else {
                     throw "Invalid event key and callback. Event key should be a string and callback should be a function."
                 }
+                return r;
+            }
+        };
+        return r;
+    }
+
+    /**
+     * Listen for webhook events
+     * @param pack Package of the event
+     * @param event Name of the event
+     * @param callbacks Callback functions to call on message and on connection close
+     */
+    listen (pack, event, params) {
+        const __callbacks = {};
+        const __eventCallback = (event) => __callbacks[event] || function () {};
+
+        const user_id = `${pack}.${event}_${this.project}:${this.key}`;
+        request({
+            uri: `${RapidAPI.callbackBaseURL()}/api/get_token?user_id=${user_id}`,
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            auth: {
+                'user': this.project,
+                'pass': this.key,
+                'sendImmediately': true
+            }
+        }, (error, response, body) => {
+            const { token } = JSON.parse(body);
+            const sock_url = `${RapidAPI.websocketBaseURL()}/socket/websocket?token=${token}`;
+            const socket = new Socket.Socket(sock_url, {
+                params: {token}
+            });
+            socket.connect();
+            const channel = socket.channel(`users_socket:${user_id}`, params);
+            channel.join()
+                   .receive('ok', msg => { __eventCallback('join')(msg); })
+                   .receive('error', reason => { __eventCallback('error')(reason); })
+                   .receive('timeout', () => { __eventCallback('timeout'); });
+
+            channel.on('new_msg', msg => { __eventCallback('message')(msg.body); });
+            channel.onError(() => __eventCallback('error'));
+            channel.onClose(() => __eventCallback('close'));
+        });
+        const r = {
+            on: (event, func) => {
+                if (typeof func !== 'function') throw "Callback must be a function.";
+                if (typeof event !== 'string') throw "Event must be a string.";
+                __callbacks[event] = func;
                 return r;
             }
         };
