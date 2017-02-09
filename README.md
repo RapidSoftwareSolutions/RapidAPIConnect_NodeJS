@@ -100,7 +100,7 @@ RapidAPI uses the [form-data](https://github.com/form-data/form-data) library by
 After setting up the webhook, you can listen to real-time events via websockets like so:
 
 ```
-rapid.listen('Slack', 'Outgoing', {
+rapid.listen('Slack', 'Outgoing', {token: ''}, {
     onMessage: message => { /* YOUR CODE HERE */ },
     onClose: (code, reason) => { /* YOUR CODE HERE */ }
 });

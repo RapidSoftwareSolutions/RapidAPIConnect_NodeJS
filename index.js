@@ -29,7 +29,7 @@ class RapidAPI {
     * @return {string} Base URL for webhook event callbacks
     */
     static callbackBaseURL() {
-        return "https://webhooks.rapidapi.io";
+        return "http://webhooks.imrapid.io";
     }
 
     /**
@@ -37,17 +37,7 @@ class RapidAPI {
      * @return {string} Base URL for websocket connection
      */
     static websocketBaseURL() {
-        return "ws://webhooks.rapidapi.io";
-    }
-    
-    /**
-    * Build a URL for a webhook event callback
-    * @param pack Package where the block is
-    * @param event Event to be called
-    * @returns {string} Generated callback URL
-    */
-    static eventURLBuilder(pack, event) {
-        return `${RapidAPI.callbackBaseURL()}/${pack}/${event}/${this.project}/${this.key}`;
+        return "ws://webhooks.imrapid.io";
     }
 
     /**
@@ -122,12 +112,11 @@ class RapidAPI {
      * @param event Name of the event
      * @param callbacks Callback functions to call on message and on connection close
      */
-    listen (pack, event, params, callbacks) {
+    listen (pack, event, params) {
+        const __callbacks = {};
+        const __eventCallback = (event) => __callbacks[event] || function () {};
+
         const user_id = `${pack}.${event}_${this.project}:${this.key}`;
-        const {
-            onMessage = () => {},
-            onClose = () => {}
-        } = callbacks;
         request({
             uri: `${RapidAPI.callbackBaseURL()}/api/get_token?user_id=${user_id}`,
             method: 'GET',
@@ -147,12 +136,24 @@ class RapidAPI {
             });
             socket.connect();
             const channel = socket.channel(`users_socket:${user_id}`, params);
-            channel.on('new_msg', msg => onMessage(msg.body));
             channel.join()
-                   .receive('error', reason => onError(reason))
-                   .receive('timeout', () => console.log("network issue"));
-            channel.onClose(onClose);
-        });    
+                   .receive('ok', msg => { __eventCallback('join')(msg); })
+                   .receive('error', reason => { __eventCallback('error')(reason); })
+                   .receive('timeout', () => { __eventCallback('timeout'); });
+
+            channel.on('new_msg', msg => { __eventCallback('message')(msg.body); });
+            channel.onError(() => __eventCallback('error'));
+            channel.onClose(() => __eventCallback('close'));
+        });
+        const r = {
+            on: (event, func) => {
+                if (typeof func !== 'function') throw "Callback must be a function.";
+                if (typeof event !== 'string') throw "Event must be a string.";
+                __callbacks[event] = func;
+                return r;
+            }
+        };
+        return r;
     }
 }
 
