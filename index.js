@@ -29,7 +29,7 @@ class RapidAPI {
     * @return {string} Base URL for webhook event callbacks
     */
     static callbackBaseURL() {
-        return "https://webhooks.imrapid.io";
+        return "https://webhooks.rapidapi.xyz";
     }
 
     /**
@@ -37,7 +37,7 @@ class RapidAPI {
      * @return {string} Base URL for websocket connection
      */
     static websocketBaseURL() {
-        return "wss://webhooks.imrapid.io";
+        return "wss://webhooks.rapidapi.xyz";
     }
 
     /**
