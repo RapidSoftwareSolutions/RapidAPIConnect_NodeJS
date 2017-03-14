@@ -29,7 +29,7 @@ class RapidAPI {
     * @return {string} Base URL for webhook event callbacks
     */
     static callbackBaseURL() {
-        return "http://webhooks.imrapid.io";
+        return "https://webhooks.rapidapi.com";
     }
 
     /**
@@ -37,7 +37,7 @@ class RapidAPI {
      * @return {string} Base URL for websocket connection
      */
     static websocketBaseURL() {
-        return "ws://webhooks.imrapid.io";
+        return "wss://webhooks.rapidapi.com";
     }
 
     /**
@@ -141,7 +141,13 @@ class RapidAPI {
                    .receive('error', reason => { __eventCallback('error')(reason); })
                    .receive('timeout', () => { __eventCallback('timeout'); });
 
-            channel.on('new_msg', msg => { __eventCallback('message')(msg.body); });
+            channel.on('new_msg', msg => {
+                if (!msg.token) {
+                    __eventCallback('error')(msg.body);
+                } else if (msg.token === token) {
+                    __eventCallback('message')(msg.body);
+                }
+            });
             channel.onError(() => __eventCallback('error'));
             channel.onClose(() => __eventCallback('close'));
         });
