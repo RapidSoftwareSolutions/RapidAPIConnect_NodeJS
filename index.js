@@ -135,7 +135,7 @@ class RapidAPI {
                 params: {token}
             });
             socket.connect();
-            const channel = socket.channel(`users_socket:${user_id}`, params);
+            const channel = socket.channel(`users_socket:${token}`, params);
             channel.join()
                    .receive('ok', msg => { __eventCallback('join')(msg); })
                    .receive('error', reason => { __eventCallback('error')(reason); })
@@ -144,7 +144,7 @@ class RapidAPI {
             channel.on('new_msg', msg => {
                 if (!msg.token) {
                     __eventCallback('error')(msg.body);
-                } else if (msg.token === token) {
+                } else {
                     __eventCallback('message')(msg.body);
                 }
             });
