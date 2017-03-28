@@ -1,11 +1,9 @@
-# RapidAPI Connect - Node.js SDK
+<p align="center">
+  <img src="https://storage.googleapis.com/rapid_connect_static/static/github-header.png" width=350 />
+</p>
 
-This SDK allows you to connect to RapidAPI blocks from your node.js app. To start off, follow the following guide:
-
-[![npm version](https://badge.fury.io/js/rapidapi-connect.svg)](https://badge.fury.io/js/rapidapi-connect)
-[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.png?v=103)](https://opensource.org/licenses/mit-license.php)
-[![forthebadge](http://forthebadge.com/images/badges/built-by-developers.svg)](http://forthebadge.com)
-[![forthebadge](http://forthebadge.com/images/badges/uses-js.svg)](http://forthebadge.com)
+## Overview
+RapidAPI is the world's first opensource API marketplace. It allows developers to discover and connect to the world's top APIs more easily and manage multiple API connections in one place.
 
 ## Set-up:
 
