@@ -60,21 +60,33 @@ class RapidAPI {
         //Will hold all the callbacks user adds using .on()
         let __callbacks = {};
 
-        //Call the block
-        request({
+        const has_file =
+            Object.keys(args)
+                  .map(key => args[key].path)
+                  .find(arg => arg !== undefined) || false;
+        const req = {
             method: 'POST',
             uri: RapidAPI.blockURLBuilder(pack, block),
             headers: {
-                'User-Agent': 'RapidAPIConnect_NodeJS',
-                'Content-Type' : 'multipart/form-data'
+                'User-Agent': 'RapidAPIConnect_NodeJS'
             },
             auth: {
                 'user': this.project,
                 'pass': this.key,
                 'sendImmediately': true
-            },
-            formData: args || {}
-        }, (error, response, body) => {
+            }
+        };
+        if (has_file) {
+            req.formData = args || {}
+            req.headers['Content-Type'] = 'multipart/form-data';
+        } else {
+            req.headers['Content-Type'] = 'application/json';
+            req.json = true;
+            req.body = args || {}
+        }
+
+        //Call the block
+        request(req, (error, response, body) => {
             try {
                 if (typeof body != 'object')
                     body = JSON.parse(body);
