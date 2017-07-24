@@ -1,6 +1,6 @@
 {
   "name": "rapidapi-connect",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Connect to blocks on the rapidapi.com marketplace",
   "main": "index.js",
   "scripts": {
