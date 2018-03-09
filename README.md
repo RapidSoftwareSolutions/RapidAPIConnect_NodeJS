@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="https://storage.googleapis.com/rapid_connect_static/static/github-header.png" width=350 />
-</p>
+
 
 ## Overview
 RapidAPI is the world's first opensource API marketplace. It allows developers to discover and connect to the world's top APIs more easily and manage multiple API connections in one place.
